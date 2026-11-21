@@ -22,6 +22,20 @@ export default function AboutPage() {
       />
 
       <section className="section-pad bg-narah-mist">
+        <div className="container-narah mb-10 sm:mb-14">
+          <Reveal>
+            <div className="mx-auto max-w-sm sm:max-w-md bg-white p-6 sm:p-8 shadow-[0_12px_40px_rgba(6,59,43,0.08)]">
+              <Image
+                src="/images/brand/logo-full.png"
+                alt="Logo officiel NARAH SERVICE"
+                width={480}
+                height={320}
+                className="mx-auto h-auto w-full object-contain"
+                priority
+              />
+            </div>
+          </Reveal>
+        </div>
         <div className="container-narah grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
           <Reveal>
             <div className="relative aspect-[4/5] overflow-hidden">

@@ -83,6 +83,7 @@ const jsonLd = {
   slogan: company.slogan,
   url: company.seo.siteUrl,
   telephone: company.phones.map((p) => p.e164),
+  email: company.email || undefined,
   address: {
     "@type": "PostalAddress",
     addressLocality: company.city,
@@ -93,6 +94,7 @@ const jsonLd = {
     name: company.serviceArea,
   },
   image: `${company.seo.siteUrl}/images/hero/hero-camion.jpg`,
+  logo: `${company.seo.siteUrl}/images/brand/logo-full.png`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
