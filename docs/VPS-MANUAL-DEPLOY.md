@@ -32,6 +32,33 @@ Le script : audit → backup Nginx → Node 20 → clone app `main` → build �
 
 ---
 
+## Reprise après `npm EACCES` / `TAR_ENTRY_ERROR` (cas réel)
+
+**Cause :** le HOME de l’utilisateur `narah` est `/var/www/narahservice` (root:root) → impossible de créer `.npm` → `npm ci` échoue, pas de systemd ni de vhost.
+
+```bash
+rm -rf /tmp/narah-src
+git clone --depth 1 --branch cursor/fix-npm-cache-perms-dcdc \
+  https://github.com/warrzy/Narahservice.git /tmp/narah-src
+# (après merge : utiliser --branch main)
+chmod +x /tmp/narah-src/scripts/deploy/*.sh
+bash /tmp/narah-src/scripts/deploy/05-resume-npm-build.sh
+```
+
+Ou correction manuelle minimale puis reprise :
+
+```bash
+chown narah:narah /var/www/narahservice
+rm -rf /var/www/narahservice/app/node_modules /var/www/narahservice/.npm
+mkdir -p /var/www/narahservice/shared/npm-cache
+chown -R narah:narah /var/www/narahservice/app /var/www/narahservice/shared
+sudo -u narah -H bash -lc 'cd /var/www/narahservice/app && export npm_config_cache=/var/www/narahservice/shared/npm-cache && npm ci --no-audit --no-fund && npm run build'
+```
+
+Puis relancer `05-resume-npm-build.sh` (systemd + nginx + LE) ou le bootstrap.
+
+---
+
 ## Option B — Commandes pas à pas
 
 ### 0) Audit + backup
