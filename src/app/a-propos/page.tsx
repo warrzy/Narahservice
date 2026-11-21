@@ -24,12 +24,12 @@ export default function AboutPage() {
       <section className="section-pad bg-narah-mist">
         <div className="container-narah mb-10 sm:mb-14">
           <Reveal>
-            <div className="mx-auto max-w-sm sm:max-w-md bg-white p-6 sm:p-8 shadow-[0_12px_40px_rgba(6,59,43,0.08)]">
+            <div className="mx-auto max-w-sm sm:max-w-md bg-black p-4 sm:p-6 shadow-[0_12px_40px_rgba(6,59,43,0.18)]">
               <Image
                 src="/images/brand/logo-full.png"
-                alt="Logo officiel NARAH SERVICE"
-                width={480}
-                height={320}
+                alt="Logo officiel NARAH SERVICE — sable, granite, matériaux de construction"
+                width={612}
+                height={408}
                 className="mx-auto h-auto w-full object-contain"
                 priority
               />

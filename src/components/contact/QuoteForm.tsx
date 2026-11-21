@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, MessageCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { quoteSchema, type QuoteFormData, materialOptions } from "@/lib/quote-schema";
 import { Button } from "@/components/ui/Button";
+import {
+  buildQuoteWhatsAppMessage,
+  buildWhatsAppUrl,
+  isWhatsAppConfigured,
+  openWhatsAppFromUserGesture,
+} from "@/lib/whatsapp";
 
 const materialLabels: Record<(typeof materialOptions)[number], string> = {
   sable: "Sable",
@@ -16,10 +22,19 @@ const materialLabels: Record<(typeof materialOptions)[number], string> = {
   autre: "Autre",
 };
 
+const WHATSAPP_READY_MESSAGE =
+  "Votre message est prêt dans WhatsApp. Appuyez sur Envoyer pour transmettre votre demande.";
+
+type WhatsAppStatus = "idle" | "ready" | "blocked";
+type EmailStatus = "idle" | "sending" | "sent" | "unavailable" | "error";
+
 export function QuoteForm() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus>("idle");
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
+  const [emailError, setEmailError] = useState("");
+  const [manualWhatsAppUrl, setManualWhatsAppUrl] = useState<string | null>(null);
+  const [smtpConfigured, setSmtpConfigured] = useState(false);
 
   const {
     register,
@@ -51,33 +66,112 @@ export function QuoteForm() {
     }
   }, [searchParams, setValue]);
 
-  const onSubmit = async (data: QuoteFormData) => {
-    setStatus("idle");
-    setErrorMessage("");
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/devis", { method: "GET" });
+        if (!res.ok) return;
+        const json = (await res.json()) as { smtpConfigured?: boolean };
+        if (!cancelled) setSmtpConfigured(Boolean(json.smtpConfigured));
+      } catch {
+        if (!cancelled) setSmtpConfigured(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const sendEmailIndependently = async (data: QuoteFormData) => {
+    setEmailStatus("sending");
+    setEmailError("");
     try {
       const res = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      const json = (await res.json()) as { ok?: boolean; error?: string; configured?: boolean };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        configured?: boolean;
+        emailSent?: boolean;
+      };
+
+      if (res.status === 503 || json.configured === false) {
+        setEmailStatus("unavailable");
+        return;
+      }
 
       if (!res.ok) {
-        setStatus("error");
-        setErrorMessage(
+        setEmailStatus("error");
+        setEmailError(
           json.error ||
-            "Une erreur est survenue. Veuillez réessayer ou nous appeler directement.",
+            "L'e-mail n'a pas pu être envoyé. Votre demande WhatsApp n'est pas affectée.",
         );
         return;
       }
 
-      setStatus("success");
-      reset();
+      setEmailStatus("sent");
     } catch {
-      setStatus("error");
-      setErrorMessage(
-        "Impossible d'envoyer la demande. Vérifiez votre connexion ou contactez-nous par téléphone.",
+      setEmailStatus("error");
+      setEmailError(
+        "L'e-mail n'a pas pu être envoyé. Votre demande WhatsApp n'est pas affectée.",
       );
+    }
+  };
+
+  const onSubmit = (data: QuoteFormData) => {
+    setWhatsappStatus("idle");
+    setEmailStatus("idle");
+    setEmailError("");
+    setManualWhatsAppUrl(null);
+
+    // Honeypot : ne rien ouvrir / ne rien envoyer
+    if (data.website && data.website.length > 0) {
+      setWhatsappStatus("ready");
+      return;
+    }
+
+    if (!isWhatsAppConfigured()) {
+      setWhatsappStatus("blocked");
+      setManualWhatsAppUrl(null);
+      // Si WhatsApp indisponible mais SMTP oui, tenter l'e-mail seul
+      if (smtpConfigured) {
+        void sendEmailIndependently(data);
+      }
+      return;
+    }
+
+    const message = buildQuoteWhatsAppMessage(data);
+    const url = buildWhatsAppUrl(message);
+    if (!url) {
+      setWhatsappStatus("blocked");
+      return;
+    }
+
+    // Ouverture synchrone dans le geste utilisateur (pas d'await avant)
+    const popup = openWhatsAppFromUserGesture(url);
+    if (!popup) {
+      setWhatsappStatus("blocked");
+      setManualWhatsAppUrl(url);
+    } else {
+      setWhatsappStatus("ready");
+    }
+
+    // E-mail = opération indépendante ; jamais de POST si SMTP désactivé
+    // (évite de transmettre les données formulaire au serveur sans besoin)
+    if (smtpConfigured) {
+      void sendEmailIndependently(data);
+    } else {
+      setEmailStatus("unavailable");
+    }
+
+    // Ne pas reset immédiatement : l'utilisateur peut revenir du WA
+    // Reset soft après succès WhatsApp pour éviter de perdre le contexte si popup bloqué
+    if (popup) {
+      reset();
     }
   };
 
@@ -91,6 +185,11 @@ export function QuoteForm() {
       noValidate
       aria-describedby="form-status"
     >
+      <p className="text-sm text-narah-muted leading-relaxed -mt-2 mb-2">
+        Après validation, votre demande s&apos;ouvre dans WhatsApp. L&apos;envoi e-mail éventuel
+        est indépendant et n&apos;est tenté que si le serveur SMTP est configuré.
+      </p>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="fullName" className="block text-sm font-semibold text-narah-deep mb-2">
@@ -271,31 +370,87 @@ export function QuoteForm() {
       )}
 
       <div id="form-status" aria-live="polite" className="space-y-3">
-        {status === "success" && (
+        {(whatsappStatus === "ready" || (whatsappStatus === "blocked" && manualWhatsAppUrl)) && (
+          <div className="flex gap-3 bg-narah-emerald/10 border border-narah-emerald/30 text-narah-deep p-4">
+            <MessageCircle className="size-5 text-narah-emerald shrink-0 mt-0.5" aria-hidden />
+            <p>{WHATSAPP_READY_MESSAGE}</p>
+          </div>
+        )}
+
+        {whatsappStatus === "blocked" && (
+          <div className="flex gap-3 bg-amber-50 border border-amber-200 text-amber-950 p-4">
+            <AlertCircle className="size-5 text-amber-700 shrink-0 mt-0.5" aria-hidden />
+            <div className="space-y-2">
+              <p>
+                L&apos;ouverture automatique de WhatsApp a été bloquée par le navigateur, ou
+                WhatsApp n&apos;est pas disponible.
+              </p>
+              {manualWhatsAppUrl ? (
+                <p>
+                  <a
+                    href={manualWhatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-narah-emerald underline underline-offset-2"
+                  >
+                    Ouvrir WhatsApp manuellement
+                  </a>
+                </p>
+              ) : (
+                <p>Utilisez le lien WhatsApp ou les numéros de téléphone indiqués à droite.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {emailStatus === "sending" && (
+          <div className="flex gap-3 bg-narah-mist border border-narah-deep/10 text-narah-muted p-4">
+            <Loader2 className="size-5 shrink-0 mt-0.5 animate-spin" aria-hidden />
+            <p>Envoi e-mail en cours (indépendant de WhatsApp)…</p>
+          </div>
+        )}
+
+        {emailStatus === "sent" && (
           <div className="flex gap-3 bg-narah-emerald/10 border border-narah-emerald/30 text-narah-deep p-4">
             <CheckCircle2 className="size-5 text-narah-emerald shrink-0 mt-0.5" aria-hidden />
             <p>
-              Votre demande a bien été envoyée. Nous vous recontacterons dans les meilleurs
-              délais.
+              Une copie e-mail a également été transmise à NARAH SERVICE. Cela ne remplace pas
+              l&apos;envoi de votre message dans WhatsApp.
             </p>
           </div>
         )}
-        {status === "error" && (
+
+        {emailStatus === "error" && (
           <div className="flex gap-3 bg-red-50 border border-red-200 text-red-900 p-4">
             <AlertCircle className="size-5 text-red-700 shrink-0 mt-0.5" aria-hidden />
-            <p>{errorMessage}</p>
+            <p>{emailError}</p>
           </div>
+        )}
+
+        {emailStatus === "unavailable" && whatsappStatus === "ready" && (
+          <p className="text-sm text-narah-muted">
+            L&apos;envoi par e-mail n&apos;est pas configuré pour le moment — votre demande passe
+            par WhatsApp uniquement.
+          </p>
         )}
       </div>
 
-      <Button type="submit" variant="primary" className="w-full sm:w-auto min-w-[14rem]" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        variant="primary"
+        className="w-full sm:w-auto min-w-[14rem]"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Envoi en cours…
+            Préparation…
           </>
         ) : (
-          "Envoyer ma demande"
+          <>
+            <MessageCircle className="size-4" aria-hidden />
+            Continuer sur WhatsApp
+          </>
         )}
       </Button>
     </form>

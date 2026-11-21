@@ -21,6 +21,13 @@ function isSmtpConfigured(): boolean {
   );
 }
 
+/** Statut SMTP public — sans accepter de données formulaire. */
+export async function GET() {
+  return NextResponse.json({
+    smtpConfigured: isSmtpConfigured(),
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
@@ -32,6 +39,19 @@ export async function POST(request: Request) {
           error: `Trop de demandes. Réessayez dans ${limited.retryAfterSec} secondes.`,
         },
         { status: 429 },
+      );
+    }
+
+    // Ne pas lire le corps si SMTP inactif : aucune donnée formulaire n'est alors reçue/traitée.
+    if (!isSmtpConfigured()) {
+      return NextResponse.json(
+        {
+          ok: false,
+          configured: false,
+          error:
+            "L'envoi d'e-mails n'est pas encore configuré sur le serveur. Utilisez WhatsApp ou téléphone.",
+        },
+        { status: 503 },
       );
     }
 
@@ -47,19 +67,7 @@ export async function POST(request: Request) {
 
     // Honeypot
     if (data.website && data.website.length > 0) {
-      return NextResponse.json({ ok: true });
-    }
-
-    if (!isSmtpConfigured()) {
-      return NextResponse.json(
-        {
-          ok: false,
-          configured: false,
-          error:
-            "L'envoi d'e-mails n'est pas encore configuré sur le serveur. Merci de nous appeler directement aux numéros indiqués sur le site.",
-        },
-        { status: 503 },
-      );
+      return NextResponse.json({ ok: true, emailSent: true });
     }
 
     const transporter = nodemailer.createTransport({
@@ -107,14 +115,14 @@ export async function POST(request: Request) {
       text,
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, emailSent: true });
   } catch (error) {
     console.error("[api/devis]", error);
     return NextResponse.json(
       {
         ok: false,
         error:
-          "Erreur lors de l'envoi. Veuillez réessayer plus tard ou nous contacter par téléphone.",
+          "Erreur lors de l'envoi e-mail. Votre demande WhatsApp n'est pas affectée.",
       },
       { status: 500 },
     );

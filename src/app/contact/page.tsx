@@ -33,7 +33,8 @@ export default function ContactPage() {
                 Formulaire de devis
               </h2>
               <p className="text-narah-muted mb-8">
-                Les champs marqués d&apos;un astérisque sont obligatoires.
+                Les champs marqués d&apos;un astérisque sont obligatoires. La validation ouvre
+                WhatsApp avec votre message prérempli — sans dépendre de l&apos;e-mail serveur.
               </p>
               <Suspense fallback={<p className="text-narah-muted">Chargement du formulaire…</p>}>
                 <QuoteForm />
