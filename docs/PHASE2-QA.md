@@ -38,8 +38,8 @@ Dossier `/opt/cursor/artifacts/phase2/` — notamment `p2-04-menu-mobile-ouvert.
 ## Logo
 
 Logos officiels client intégrés (`public/images/brand/`) :
-- `logo-header.png` — header / menu (camion + NARAH SERVICE)
-- `logo-full.png` — version complète (sable / granite + bandeau)
+- `logo-official.png` / `logo-header.png` — PNG à **canal alpha réel** (coins alpha=0)
+- Composant `Logo` : **aucun** `bg-black` / pastille blanche (fond CSS transparent)
 - `logo-mark-house.jpg` — marque maison/N (favicon)
 - Favicon / apple-icon générés
 
