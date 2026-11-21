@@ -94,10 +94,26 @@ else
 fi
 
 ln -sfn "${APP_ROOT}/shared/.env" "${APP_ROOT}/app/.env.local"
-chown -R narah:narah "${APP_ROOT}/app" "${APP_ROOT}/shared" "${APP_ROOT}/releases"
 
-# Build as narah user
-sudo -u narah -H bash -lc "cd ${APP_ROOT}/app && npm ci && npm run build"
+# HOME de narah = APP_ROOT : il doit pouvoir créer .npm / écrire le cache.
+# Sans cela → EACCES sur /var/www/narahservice/.npm + TAR_ENTRY_ERROR.
+chown narah:narah "${APP_ROOT}"
+chown -R narah:narah "${APP_ROOT}/app" "${APP_ROOT}/shared" "${APP_ROOT}/releases"
+mkdir -p "${APP_ROOT}/shared/npm-cache"
+chown -R narah:narah "${APP_ROOT}/shared/npm-cache"
+# Nettoyer une install partielle éventuelle
+rm -rf "${APP_ROOT}/app/node_modules" "${APP_ROOT}/.npm"
+rm -f "${APP_ROOT}/app/package-lock.json.bak" 2>/dev/null || true
+
+# Build as narah user (cache dédié, writable)
+sudo -u narah -H bash -lc "
+  set -euo pipefail
+  cd ${APP_ROOT}/app
+  export npm_config_cache=${APP_ROOT}/shared/npm-cache
+  export npm_config_prefer_offline=false
+  npm ci --no-audit --no-fund
+  npm run build
+"
 
 # systemd unit
 sed -e "s/__APP_PORT__/${APP_PORT}/g" \
