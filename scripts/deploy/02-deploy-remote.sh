@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Déploiement isolé NARAH SERVICE sur VPS Hostinger.
 # Prérequis : DOMAIN, APP_PORT libres, Node.js, Nginx, Certbot.
-# Ne touche PAS aux autres vhosts / apps.
+# Ne touche PAS aux autres vhosts / apps (ecom-touch.tech inclus).
 set -euo pipefail
 
 DOMAIN="${DOMAIN:?DOMAIN requis}"
@@ -22,9 +22,20 @@ if ss -tuln | grep -qE ":${APP_PORT}\\b"; then
   exit 1
 fi
 
+if ! command -v node >/dev/null || [[ "$(node -v | sed 's/^v//;s/\..*//')" -lt 20 ]]; then
+  echo "[ERROR] Node.js >= 20 requis. Lancez d'abord vps-bootstrap-as-root.sh" >&2
+  exit 1
+fi
+
 # --- Safety: refuse overwriting foreign nginx sites ---
 if [[ -e /etc/nginx/sites-enabled/${DOMAIN} ]] || [[ -e /etc/nginx/sites-available/${DOMAIN} ]]; then
-  echo "[WARN] Un vhost ${DOMAIN} existe déjà — sauvegarde avant écrasement contrôlé."
+  echo "[WARN] Un vhost nommé ${DOMAIN} existe déjà — sauvegarde avant écrasement contrôlé du seul fichier narahservice."
+fi
+
+# Signaler les server_name déjà déclarés pour ce domaine (hors notre futur fichier)
+if grep -R --include='*' -n "server_name.*${DOMAIN}" /etc/nginx/sites-enabled/ 2>/dev/null \
+  | grep -v "/narahservice:" | grep -v "sites-enabled/narahservice"; then
+  echo "[WARN] Autre vhost mentionne déjà ${DOMAIN} — vérifier manuellement (conflit possible)."
 fi
 
 mkdir -p "${BACKUP_DIR}"
@@ -75,6 +86,11 @@ else
   else
     echo "NEXT_PUBLIC_SITE_URL=${SITE_URL}" >> "${APP_ROOT}/shared/.env"
   fi
+  if grep -q '^PORT=' "${APP_ROOT}/shared/.env"; then
+    sed -i "s|^PORT=.*|PORT=${APP_PORT}|" "${APP_ROOT}/shared/.env"
+  else
+    echo "PORT=${APP_PORT}" >> "${APP_ROOT}/shared/.env"
+  fi
 fi
 
 ln -sfn "${APP_ROOT}/shared/.env" "${APP_ROOT}/app/.env.local"
@@ -89,10 +105,16 @@ sed -e "s/__APP_PORT__/${APP_PORT}/g" \
 systemctl daemon-reload
 systemctl enable narahservice.service
 systemctl restart narahservice.service
-sleep 2
+sleep 3
+if ! systemctl is-active --quiet narahservice.service; then
+  echo "[ERROR] Service narahservice inactif." >&2
+  journalctl -u narahservice -n 40 --no-pager >&2 || true
+  exit 1
+fi
 systemctl --no-pager --full status narahservice.service | head -30
 
 # Nginx : bootstrap HTTP si pas encore de certificat, sinon conf HTTPS complète
+# Fichier dédié `narahservice` uniquement — ne pas toucher default / ecom-touch.
 render_nginx() {
   local tpl="$1"
   sed -e "s/__DOMAIN__/${DOMAIN}/g" \
@@ -101,22 +123,62 @@ render_nginx() {
       "${tpl}" > /etc/nginx/sites-available/narahservice
 }
 
+ensure_ssl_includes() {
+  # Fichiers souvent créés par certbot ; fallback minimal si absents
+  if [[ ! -f /etc/letsencrypt/options-ssl-nginx.conf ]]; then
+    mkdir -p /etc/letsencrypt
+    cat > /etc/letsencrypt/options-ssl-nginx.conf <<'SSL'
+ssl_session_cache shared:le_nginx_SSL:10m;
+ssl_session_timeout 1440m;
+ssl_session_tickets off;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers off;
+SSL
+  fi
+  if [[ ! -f /etc/letsencrypt/ssl-dhparams.pem ]]; then
+    openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
+  fi
+}
+
 if [[ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]]; then
   render_nginx "${SCRIPT_DIR}/narahservice.nginx.http-bootstrap.conf.tpl"
 else
+  ensure_ssl_includes
   render_nginx "${SCRIPT_DIR}/narahservice.nginx.conf.tpl"
 fi
 
 ln -sfn /etc/nginx/sites-available/narahservice /etc/nginx/sites-enabled/narahservice
+
+# La page « Welcome to nginx! » vient du site `default` (default_server).
+# On NE le supprime pas (autres usages éventuels) : notre server_name doit matcher le Host.
+# Si un fichier default contient aussi server_name narahservice.fr, on le signale.
+if [[ -e /etc/nginx/sites-enabled/default ]]; then
+  if grep -E "server_name.*${DOMAIN}" /etc/nginx/sites-enabled/default >/dev/null 2>&1; then
+    echo "[WARN] sites-enabled/default contient server_name ${DOMAIN} — conflit potentiel."
+  else
+    echo "[deploy] sites-enabled/default présent (Welcome page) — OK tant que Host=${DOMAIN} match notre vhost."
+  fi
+fi
+
 nginx -t
 systemctl reload nginx
 
-# Certbot — certificat dédié NARAH uniquement
+# Certbot — certificat dédié NARAH uniquement (ne demande pas d'autres domaines)
 if [[ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]]; then
-  certbot --nginx -d "${DOMAIN}" -d "${WWW_DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email --redirect \
-    || certbot certonly --webroot -w /var/www/certbot -d "${DOMAIN}" -d "${WWW_DOMAIN}" --non-interactive --agree-tos --register-unsafely-without-email
+  certbot certonly --webroot -w /var/www/certbot \
+    -d "${DOMAIN}" -d "${WWW_DOMAIN}" \
+    --non-interactive --agree-tos --register-unsafely-without-email \
+    || certbot --nginx -d "${DOMAIN}" -d "${WWW_DOMAIN}" \
+         --non-interactive --agree-tos --register-unsafely-without-email --redirect
+  ensure_ssl_includes
   render_nginx "${SCRIPT_DIR}/narahservice.nginx.conf.tpl"
-  # Si certbot a déjà écrit un vhost, on garde le nôtre isolé nommé narahservice
+  # Retirer d'éventuels vhosts auto-générés par certbot pour ce domaine (garder le nôtre)
+  for f in /etc/nginx/sites-enabled/${DOMAIN} /etc/nginx/sites-enabled/${DOMAIN}.conf; do
+    if [[ -e "$f" && ! "$f" -ef /etc/nginx/sites-enabled/narahservice ]]; then
+      echo "[deploy] retrait lien certbot parasite: $f"
+      rm -f "$f"
+    fi
+  done
   nginx -t
   systemctl reload nginx
 fi
