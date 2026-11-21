@@ -28,7 +28,7 @@ export function Hero() {
       <motion.div style={{ y }} className="absolute inset-0">
         <Image
           src="/images/hero/hero-camion.jpg"
-          alt="Camion et engins sur un chantier de construction — illustration"
+          alt="Illustration : camion-benne et chargeuse sur une carrière de latérite"
           fill
           priority
           sizes="100vw"

@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, Phone, X } from "lucide-react";
 import { company, navLinks } from "@/config/company";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/brand/Logo";
 import { buildWhatsAppUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 export function Header() {
@@ -44,16 +44,7 @@ export function Header() {
       ].join(" ")}
     >
       <div className="container-narah flex h-[4.5rem] items-center justify-between gap-4 lg:h-20">
-        <Link href="/" className="relative z-50 focus-ring shrink-0" aria-label="NARAH SERVICE — Accueil">
-          <Image
-            src="/images/brand/logo-placeholder.svg"
-            alt="NARAH SERVICE — logo provisoire à remplacer"
-            width={168}
-            height={44}
-            priority
-            className="h-10 w-auto lg:h-11"
-          />
-        </Link>
+        <Logo />
 
         <nav className="hidden lg:flex items-center gap-1" aria-label="Navigation principale">
           {navLinks.map((link) => {

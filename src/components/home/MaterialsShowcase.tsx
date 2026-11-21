@@ -43,6 +43,9 @@ export function MaterialsShowcase() {
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-narah-deep/50 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-narah-deep/20" />
+                  <span className="absolute left-4 top-4 z-10 bg-narah-deep/75 text-narah-gold text-[0.62rem] font-bold tracking-[0.16em] uppercase px-2.5 py-1">
+                    Illustration
+                  </span>
                 </div>
 
                 <div

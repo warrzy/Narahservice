@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { company, materials, navLinks } from "@/config/company";
+import { Logo } from "@/components/brand/Logo";
 import { buildWhatsAppUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 export function Footer() {
@@ -12,13 +12,7 @@ export function Footer() {
       <div className="container-narah section-pad !pb-12 !pt-16">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5 space-y-6">
-            <Image
-              src="/images/brand/logo-placeholder.svg"
-              alt="NARAH SERVICE — logo provisoire"
-              width={180}
-              height={46}
-              className="h-11 w-auto"
-            />
+            <Logo href="/" />
             <p className="font-display text-2xl sm:text-3xl text-balance max-w-md leading-tight">
               {company.slogan}
             </p>

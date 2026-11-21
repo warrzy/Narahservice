@@ -1,30 +1,61 @@
-# Résultats des tests
+# Résultats des tests — NARAH SERVICE
 
-Document mis à jour après exécution des vérifications automatisées et manuelles.
+Date d’exécution : 2026-11-21
 
-## Commandes
+## Commandes automatisées
 
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
+| Commande | Résultat |
+|---|---|
+| `npm run lint` | OK |
+| `npm run typecheck` | OK |
+| `npm run build` | OK (Next.js 16.4.6) |
+| `npm run start` | OK — http://localhost:3000 |
 
-## Statut
+## Routes HTTP
 
-À remplir après la première exécution complète dans cet environnement.
+| Route | Statut |
+|---|---|
+| `/` | 200 |
+| `/a-propos` | 200 |
+| `/materiaux` | 200 |
+| `/realisations` | 200 |
+| `/contact` | 200 |
+| `/sitemap.xml` | 200 |
+| `/robots.txt` | 200 |
 
-## Responsive (à vérifier manuellement)
+## API devis `POST /api/devis`
 
-Largeurs cibles : 320, 375, 390, 430, 768, 1024, 1440 px.
+| Cas | Résultat attendu | Observé |
+|---|---|---|
+| Corps vide | 400 validation | 400 |
+| Données valides, SMTP absent | 503 + message clair | 503 — *« L'envoi d'e-mails n'est pas encore configuré… »* |
+| Honeypot rempli | 200 silencieux | Non rejoué en QA manuelle (code présent) |
 
-## Points de contrôle fonctionnels
+**L’envoi n’est pas simulé.** Sans SMTP, l’API refuse explicitement.
 
-- [ ] Liens `tel:` sur les trois numéros
-- [ ] Bouton WhatsApp absent si numéro non configuré
-- [ ] Bouton WhatsApp actif après configuration
-- [ ] Formulaire : validation client
-- [ ] Formulaire : API 503 sans SMTP (comportement attendu)
-- [ ] Formulaire : envoi OK avec SMTP configuré
-- [ ] Pas de scroll horizontal mobile
-- [ ] `prefers-reduced-motion` respecté
+## Responsive (Playwright)
+
+Largeurs testées : 320, 375, 390, 430, 768, 1024, 1440 px.
+
+| Largeur | Scroll horizontal |
+|---|---|
+| 320–1440 | Aucun (`scrollWidth === clientWidth`) |
+
+Captures : `/opt/cursor/artifacts/01-*.png` … `11-*.png`
+
+## Points fonctionnels
+
+- [x] Liens `tel:` sur les trois numéros
+- [x] WhatsApp masqué tant que `NEXT_PUBLIC_WHATSAPP_NUMBER` est vide
+- [x] Message d’attente WhatsApp sur la page contact
+- [x] Validation formulaire côté client
+- [x] API 503 sans SMTP (comportement documenté)
+- [ ] Envoi e-mail réel — **dépend de la config SMTP client**
+- [x] Pas de scroll horizontal mobile
+- [x] `prefers-reduced-motion` géré dans CSS + Motion
+
+## Notes
+
+- Logo officiel absent : wordmark provisoire HTML/CSS.
+- Visuels hero/matériaux : illustrations (IA / stock) clairement signalées ; à remplacer par photos réelles.
+- Numéro WhatsApp et adresse Maps : en attente client.

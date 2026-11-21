@@ -73,7 +73,7 @@ export const materials: {
       "Aménagements de chantier",
     ],
     image: "/images/materials/sable.jpg",
-    imageAlt: "Tas de sable destiné aux travaux de construction — illustration",
+    imageAlt: "Illustration : tas de sable de construction avec camion en arrière-plan",
   },
   {
     id: "granite",
@@ -90,7 +90,7 @@ export const materials: {
       "Remblais et couches de forme",
     ],
     image: "/images/materials/granite.jpg",
-    imageAlt: "Granulats et granite pour chantier — illustration",
+    imageAlt: "Illustration : granulats de granite pour chantier",
   },
   {
     id: "laterite",
@@ -107,7 +107,7 @@ export const materials: {
       "Préparation de plateformes",
     ],
     image: "/images/materials/laterite.jpg",
-    imageAlt: "Latérite pour aménagement et terrassement — illustration",
+    imageAlt: "Illustration : latérite rouge pour terrassement",
   },
 ];
 
