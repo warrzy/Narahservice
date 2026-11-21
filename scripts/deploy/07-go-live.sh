@@ -34,13 +34,18 @@ fi
 apt-get install -y git nginx certbot python3-certbot-nginx curl openssl
 node -v
 
-echo "=== [3] Port libre ==="
+echo "=== [3] Port (conserver le port NARAH existant) ==="
 APP_PORT=""
+# 1) .env déjà déployé
 if [[ -f "${APP_ROOT}/shared/.env" ]] && grep -q '^PORT=' "${APP_ROOT}/shared/.env"; then
   APP_PORT="$(grep '^PORT=' "${APP_ROOT}/shared/.env" | cut -d= -f2 | tr -d '[:space:]')"
 fi
-if [[ -z "${APP_PORT}" ]] || ss -tuln | grep -qE ":${APP_PORT}\\b"; then
-  APP_PORT=""
+# 2) unit systemd existante
+if [[ -z "${APP_PORT}" ]] && [[ -f /etc/systemd/system/narahservice.service ]]; then
+  APP_PORT="$(grep -oE '127\.0\.0\.1:[0-9]+' /etc/systemd/system/narahservice.service | head -1 | cut -d: -f2 || true)"
+fi
+# 3) sinon premier port libre (premier déploiement)
+if [[ -z "${APP_PORT}" ]]; then
   for p in 3010 3011 3012 3020 3030 3040; do
     if ! ss -tuln | grep -qE ":${p}\\b"; then APP_PORT=$p; break; fi
   done
