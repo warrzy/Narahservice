@@ -6,14 +6,14 @@ type LogoProps = {
   className?: string;
   /** Variante compacte (header mobile) */
   compact?: boolean;
-  /** Affiche le logo complet avec bandeau matériaux */
+  /** Affiche le logo complet (camion + bandeau matériaux) */
   full?: boolean;
   onNavigate?: () => void;
 };
 
 /**
- * Logo officiel NARAH SERVICE (fichiers client).
- * Sur fond sombre (header / menu), pastille blanche pour lisibilité.
+ * Logo officiel NARAH SERVICE (camion + sable/granite, fond noir).
+ * Le fond noir fait partie de l’identité — pas de pastille blanche.
  */
 export function Logo({
   href = "/",
@@ -25,24 +25,27 @@ export function Logo({
   const src = full
     ? "/images/brand/logo-full.png"
     : "/images/brand/logo-header.png";
-  const width = full ? 220 : compact ? 120 : 148;
-  const height = full ? 146 : compact ? 80 : 98;
+  const width = full ? 280 : compact ? 132 : 160;
+  const height = full ? 187 : compact ? 88 : 107;
 
   const mark = (
     <span
       className={[
-        "inline-flex items-center focus-ring rounded-sm bg-white",
-        compact ? "p-1" : "p-1.5 sm:p-2",
+        "inline-flex items-center focus-ring overflow-hidden rounded-sm bg-black shadow-sm shadow-black/30",
+        compact ? "p-0.5" : "p-0.5 sm:p-1",
         className,
       ].join(" ")}
       aria-label="NARAH SERVICE"
     >
       <Image
         src={src}
-        alt="NARAH SERVICE — logo officiel"
+        alt="NARAH SERVICE — sable, granite, matériaux de construction"
         width={width}
         height={height}
-        className="h-auto w-auto max-h-10 sm:max-h-12 object-contain"
+        className={[
+          "h-auto w-auto object-contain",
+          full ? "max-h-36 sm:max-h-44" : "max-h-11 sm:max-h-14",
+        ].join(" ")}
         priority
       />
     </span>
