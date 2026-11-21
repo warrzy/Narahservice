@@ -18,20 +18,35 @@ export const company = {
   mapsEmbedUrl: "",
   mapsLink: "",
   phones: [
-    { id: "phone-1", label: "Téléphone 1", display: "78 02 46 90", e164: "+22678024690" },
-    { id: "phone-2", label: "Téléphone 2", display: "76 34 05 41", e164: "+22676340541" },
-    { id: "phone-3", label: "Téléphone 3", display: "70 64 16 58", e164: "+22670641658" },
+    {
+      id: "phone-1",
+      label: "Ligne principale",
+      display: "+226 78 02 46 90",
+      e164: "+22678024690",
+    },
+    {
+      id: "phone-2",
+      label: "Ligne 2",
+      display: "+226 76 34 05 41",
+      e164: "+22676340541",
+    },
+    {
+      id: "phone-3",
+      label: "Ligne 3",
+      display: "+226 70 64 16 58",
+      e164: "+22670641658",
+    },
   ],
   /**
-   * Numéro WhatsApp principal (format international sans + ni espaces).
-   * À renseigner après confirmation client, ou via NEXT_PUBLIC_WHATSAPP_NUMBER.
-   * Exemple : "22678024690"
+   * WhatsApp provisoire : +226 78 02 46 90 (à confirmer activation côté client).
+   * Surcharge possible via NEXT_PUBLIC_WHATSAPP_NUMBER.
    */
   whatsappNumber:
-    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "",
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "22678024690",
   whatsappDefaultMessage:
-    "Bonjour NARAH SERVICE, je souhaite obtenir un devis pour une livraison de matériaux de construction.",
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
+    "Bonjour NARAH SERVICE, je souhaite obtenir un devis pour une livraison de matériaux de construction à Ouagadougou.",
+  /** E-mail provisoire officiel — une 2ᵉ adresse sera communiquée ultérieurement */
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "faouzoubalima@gmail.com",
   social: {
     facebook: "",
     linkedin: "",

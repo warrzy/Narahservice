@@ -83,6 +83,7 @@ const jsonLd = {
   slogan: company.slogan,
   url: company.seo.siteUrl,
   telephone: company.phones.map((p) => p.e164),
+  email: company.email || undefined,
   address: {
     "@type": "PostalAddress",
     addressLocality: company.city,

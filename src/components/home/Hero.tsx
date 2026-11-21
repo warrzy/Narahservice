@@ -3,10 +3,9 @@
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
-import { ArrowDown, MessageCircle } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { company } from "@/config/company";
 import { Button } from "@/components/ui/Button";
-import { buildWhatsAppUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -17,7 +16,6 @@ export function Hero() {
   });
   const y = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 120]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, reduce ? 1 : 0.35]);
-  const wa = buildWhatsAppUrl();
 
   return (
     <section
@@ -55,7 +53,7 @@ export function Hero() {
           initial={reduce ? false : { opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display text-white text-[clamp(2.4rem,8vw,6.2rem)] leading-[0.95] max-w-5xl text-balance"
+          className="font-display text-white text-[clamp(2.15rem,7.5vw,6.2rem)] leading-[0.98] max-w-5xl text-balance"
         >
           VOS MATÉRIAUX.
           <br />
@@ -68,7 +66,7 @@ export function Hero() {
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.35 }}
-          className="mt-6 max-w-xl text-white/80 text-base sm:text-lg leading-relaxed"
+          className="mt-5 sm:mt-6 max-w-xl text-white/85 text-[0.95rem] sm:text-lg leading-relaxed"
         >
           {company.tagline}
         </motion.p>
@@ -77,26 +75,14 @@ export function Hero() {
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.45 }}
-          className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4"
+          className="mt-7 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md sm:max-w-none"
         >
-          <Button href="/contact" variant="gold">
+          <Button href="/contact" variant="gold" className="w-full sm:w-auto">
             Demander un devis
           </Button>
-          {isWhatsAppConfigured() && wa ? (
-            <Button
-              href={wa}
-              variant="outline-light"
-              target="_blank"
-              rel="noopener noreferrer"
-              icon={<MessageCircle className="size-4" aria-hidden />}
-            >
-              Nous contacter sur WhatsApp
-            </Button>
-          ) : (
-            <Button href="/contact#contact-direct" variant="outline-light">
-              Nous contacter
-            </Button>
-          )}
+          <Button href="/materiaux" variant="outline-light" className="w-full sm:w-auto">
+            Découvrir les matériaux
+          </Button>
         </motion.div>
 
         <motion.a

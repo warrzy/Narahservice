@@ -81,32 +81,44 @@ export default function ContactPage() {
                   WhatsApp
                 </p>
                 {isWhatsAppConfigured() && wa ? (
-                  <a
-                    href={wa}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase hover:brightness-105 transition focus-ring"
-                  >
-                    <MessageCircle className="size-5" aria-hidden />
-                    Ouvrir WhatsApp
-                  </a>
+                  <div className="space-y-2">
+                    <a
+                      href={wa}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full min-h-12 items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase hover:brightness-105 transition focus-ring touch-manipulation"
+                    >
+                      <MessageCircle className="size-5" aria-hidden />
+                      Ouvrir WhatsApp
+                    </a>
+                    <p className="text-xs text-narah-muted leading-relaxed">
+                      Lien provisoire vers {company.phones[0].display}. L&apos;activation WhatsApp
+                      Business de ce numéro reste à confirmer par le client.
+                    </p>
+                  </div>
                 ) : (
                   <div className="bg-narah-gold/15 border border-narah-gold/40 p-4 text-sm text-narah-deep">
-                    Le numéro WhatsApp principal reste à confirmer. Une fois renseigné dans la
-                    configuration (<code className="text-xs">NEXT_PUBLIC_WHATSAPP_NUMBER</code>
-                    ), le bouton s&apos;activera automatiquement.
+                    Le numéro WhatsApp principal reste à confirmer.
                   </div>
                 )}
               </div>
 
               {company.email ? (
-                <a
-                  href={`mailto:${company.email}`}
-                  className="flex items-center gap-3 text-narah-deep hover:text-narah-emerald focus-ring"
-                >
-                  <Mail className="size-5" aria-hidden />
-                  {company.email}
-                </a>
+                <div className="space-y-2">
+                  <p className="text-xs font-bold tracking-[0.18em] uppercase text-narah-emerald">
+                    E-mail
+                  </p>
+                  <a
+                    href={`mailto:${company.email}`}
+                    className="flex min-h-12 items-center gap-3 text-narah-deep hover:text-narah-emerald focus-ring break-all"
+                  >
+                    <Mail className="size-5 shrink-0" aria-hidden />
+                    {company.email}
+                  </a>
+                  <p className="text-xs text-narah-muted">
+                    Adresse provisoire — une seconde adresse sera communiquée ultérieurement.
+                  </p>
+                </div>
               ) : null}
 
               <div className="space-y-3">

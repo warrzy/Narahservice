@@ -1,11 +1,10 @@
 import Image from "next/image";
-import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
-import { buildWhatsAppUrl, isWhatsAppConfigured } from "@/lib/whatsapp";
+import { company } from "@/config/company";
 
 export function CtaBand() {
-  const wa = buildWhatsAppUrl();
+  const phone = company.phones[0];
 
   return (
     <section className="relative overflow-hidden" aria-labelledby="cta-heading">
@@ -17,39 +16,27 @@ export function CtaBand() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-narah-deep/88 grain" />
+        <div className="absolute inset-0 bg-narah-deep/90 grain" />
       </div>
 
       <div className="relative container-narah section-pad text-center">
         <Reveal>
           <h2
             id="cta-heading"
-            className="font-display text-3xl sm:text-4xl lg:text-6xl text-white max-w-4xl mx-auto text-balance leading-[1.05]"
+            className="font-display text-[1.85rem] sm:text-4xl lg:text-6xl text-white max-w-4xl mx-auto text-balance leading-[1.08]"
           >
             Votre chantier mérite un partenaire sérieux.
           </h2>
-          <p className="mt-5 text-white/70 text-lg max-w-xl mx-auto">
+          <p className="mt-5 text-white/80 text-base sm:text-lg max-w-xl mx-auto">
             Contactez NARAH SERVICE pour une demande de devis adaptée à votre besoin.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button href="/contact" variant="gold">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-md sm:max-w-none mx-auto">
+            <Button href="/contact" variant="gold" className="w-full sm:w-auto">
               Demander un devis
             </Button>
-            {isWhatsAppConfigured() && wa ? (
-              <Button
-                href={wa}
-                variant="outline-light"
-                target="_blank"
-                rel="noopener noreferrer"
-                icon={<MessageCircle className="size-4" aria-hidden />}
-              >
-                WhatsApp
-              </Button>
-            ) : (
-              <Button href={`tel:+22678024690`} variant="outline-light">
-                Appeler le 78 02 46 90
-              </Button>
-            )}
+            <Button href={`tel:${phone.e164}`} variant="outline-light" className="w-full sm:w-auto">
+              Appeler {phone.display}
+            </Button>
           </div>
         </Reveal>
       </div>
