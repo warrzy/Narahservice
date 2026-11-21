@@ -1,61 +1,50 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type LogoProps = {
   href?: string;
   className?: string;
+  /** Variante compacte (header mobile) */
   compact?: boolean;
+  /** Affiche le logo complet avec bandeau matériaux */
+  full?: boolean;
   onNavigate?: () => void;
 };
 
 /**
- * Wordmark + monogramme N — proposition provisoire.
- * À remplacer par le logo officiel client sans déformation.
+ * Logo officiel NARAH SERVICE (fichiers client).
+ * Sur fond sombre (header / menu), pastille blanche pour lisibilité.
  */
 export function Logo({
   href = "/",
   className = "",
   compact = false,
+  full = false,
   onNavigate,
 }: LogoProps) {
+  const src = full
+    ? "/images/brand/logo-full.png"
+    : "/images/brand/logo-header.png";
+  const width = full ? 220 : compact ? 120 : 148;
+  const height = full ? 146 : compact ? 80 : 98;
+
   const mark = (
     <span
-      className={["inline-flex items-center gap-2.5 sm:gap-3 focus-ring", className].join(" ")}
-      aria-label="NARAH SERVICE — logo provisoire"
+      className={[
+        "inline-flex items-center focus-ring rounded-sm bg-white",
+        compact ? "p-1" : "p-1.5 sm:p-2",
+        className,
+      ].join(" ")}
+      aria-label="NARAH SERVICE"
     >
-      <span
-        aria-hidden
-        className={[
-          "relative grid place-items-center shrink-0 rounded-sm",
-          "bg-narah-gold text-narah-deep",
-          compact ? "size-8" : "size-9 sm:size-10",
-        ].join(" ")}
-      >
-        <svg viewBox="0 0 40 40" className="size-[70%]" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 32V8h5.2l9.4 14.6V8H28v24h-5.2L13.4 17.4V32H8Z"
-            fill="currentColor"
-          />
-        </svg>
-      </span>
-      <span className="flex flex-col leading-none min-w-0">
-        <span
-          className={[
-            "font-display font-extrabold tracking-[0.1em] text-white",
-            compact ? "text-base" : "text-lg sm:text-xl",
-          ].join(" ")}
-        >
-          NARAH
-        </span>
-        <span
-          className={[
-            "font-sans font-bold tracking-[0.28em] text-[#b8e08a] uppercase",
-            compact ? "text-[0.5rem]" : "text-[0.58rem] sm:text-[0.65rem]",
-          ].join(" ")}
-        >
-          Service
-        </span>
-        <span className="sr-only"> — logo provisoire à valider par le client</span>
-      </span>
+      <Image
+        src={src}
+        alt="NARAH SERVICE — logo officiel"
+        width={width}
+        height={height}
+        className="h-auto w-auto max-h-10 sm:max-h-12 object-contain"
+        priority
+      />
     </span>
   );
 

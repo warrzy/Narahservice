@@ -35,10 +35,20 @@ Toujours **503** honnête sans SMTP — non simulé.
 
 Dossier `/opt/cursor/artifacts/phase2/` — notamment `p2-04-menu-mobile-ouvert.png`, `p2-home-320.png`, `p2-06-contact-mobile.png`.
 
+## Logo
+
+Logos officiels client intégrés (`public/images/brand/`) :
+- `logo-header.png` — header / menu (camion + NARAH SERVICE)
+- `logo-full.png` — version complète (sable / granite + bandeau)
+- `logo-mark-house.jpg` — marque maison/N (favicon)
+- Favicon / apple-icon générés
+
+Pastille blanche sous le logo sur fonds verts (lisibilité).
+
 ## À confirmer client
 
 1. Activation WhatsApp réelle du `+226 78 02 46 90`
-2. Logo officiel (remplacer le provisoire)
+2. Variante logo préférée en header (camion vs camion+maison vs maison/N) — actuellement **camion**
 3. 2ᵉ adresse e-mail
 4. SMTP pour les devis
 5. Autorisation de déploiement production

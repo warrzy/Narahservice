@@ -94,6 +94,7 @@ const jsonLd = {
     name: company.serviceArea,
   },
   image: `${company.seo.siteUrl}/images/hero/hero-camion.jpg`,
+  logo: `${company.seo.siteUrl}/images/brand/logo-full.png`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
