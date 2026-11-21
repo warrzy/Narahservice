@@ -2,7 +2,13 @@
 
 **Règle absolue :** ne jamais modifier, interrompre, redémarrer ou supprimer une application déjà présente sur le serveur sans validation explicite.
 
-Serveur cible prévu : `srv1392968.hstgr.cloud` (Ubuntu 24.04 LTS, KVM 2).
+Serveur cible prévu : `147.79.118.212` / `srv1392968` (Ubuntu 24.04 LTS, KVM 2).  
+Domaine : `narahservice.fr` + `www` (ne pas toucher aux MX `mail.narahservice.fr` ni à ecom-touch.tech).
+
+**Accès SSH Cloud Agent :** voir [`docs/SSH-CURSOR-SETUP.md`](./SSH-CURSOR-SETUP.md)  
+(clé d’automatisation sans passphrase **recommandée**, ou clé chiffrée + `VPS_SSH_PASSPHRASE`).
+
+Orchestrateur : `bash scripts/deploy/run-from-agent.sh`
 
 ## 1. Audit préalable (obligatoire)
 
