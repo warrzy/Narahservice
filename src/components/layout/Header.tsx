@@ -158,7 +158,7 @@ export function Header() {
             {company.email ? (
               <a
                 href={`mailto:${company.email}`}
-                className="block text-sm text-white/75 hover:text-white focus-ring break-all"
+                className="block text-sm text-white/85 hover:text-white focus-ring break-all"
                 onClick={closeMenu}
               >
                 {company.email}

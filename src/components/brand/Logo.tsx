@@ -48,7 +48,7 @@ export function Logo({
         </span>
         <span
           className={[
-            "font-sans font-bold tracking-[0.28em] text-narah-lime uppercase",
+            "font-sans font-bold tracking-[0.28em] text-[#b8e08a] uppercase",
             compact ? "text-[0.5rem]" : "text-[0.58rem] sm:text-[0.65rem]",
           ].join(" ")}
         >
