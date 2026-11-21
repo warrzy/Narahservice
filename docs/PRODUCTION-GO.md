@@ -2,10 +2,10 @@
 
 ## Prérequis (bloquants)
 
-1. **Domaine exact** renseigné (pas un placeholder)
-2. DNS A (et www) → `147.79.118.212`
-3. Accès SSH VPS (clé ou mot de passe) via secrets
-4. PR #1 fusionnée dans `main`
+1. **Domaine** : `narahservice.fr` / `www.narahservice.fr`
+2. DNS A (et www) → `147.79.118.212` — **vérifié OK** (MX LWS non modifié)
+3. Accès SSH VPS (clé ou mot de passe) injecté dans l’environnement Cloud Agent
+4. PR #1 (site) + PR #2 (scripts) fusionnées dans `main`
 
 ## Secrets attendus
 

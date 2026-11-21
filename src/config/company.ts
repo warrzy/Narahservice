@@ -37,7 +37,7 @@ export const company = {
     linkedin: "",
   },
   seo: {
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://narahservice.bf",
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://narahservice.fr",
     locale: "fr_BF",
     defaultTitle: "NARAH SERVICE | Matériaux de construction à Ouagadougou",
     defaultDescription:
