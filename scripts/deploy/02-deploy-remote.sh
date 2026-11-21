@@ -55,10 +55,12 @@ if ! id narah >/dev/null 2>&1; then
   useradd --system --home "${APP_ROOT}" --shell /usr/sbin/nologin narah
 fi
 
-# Clone / update code
+# Clone / update code (safe.directory si repo déjà chown narah)
+git config --global --add safe.directory "${APP_ROOT}/app" || true
 if [[ ! -d "${APP_ROOT}/app/.git" ]]; then
   git clone --branch "${APP_REF}" --depth 1 "${REPO_URL}" "${APP_ROOT}/app"
 else
+  chown -R root:root "${APP_ROOT}/app" || true
   git -C "${APP_ROOT}/app" fetch origin "${APP_REF}"
   git -C "${APP_ROOT}/app" checkout "${APP_REF}"
   git -C "${APP_ROOT}/app" reset --hard "origin/${APP_REF}"
