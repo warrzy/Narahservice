@@ -1,25 +1,28 @@
 # Déploiement manuel sur VPS Hostinger (root)
 
-**Contexte :** les secrets SSH Cloud Agent sont absents → déploiement depuis le terminal VPS.  
-**Symptôme actuel :** `http://narahservice.fr` → page « Welcome to nginx! » (vhost `default`, aucune app NARAH).
+**Contexte :** les secrets SSH Cloud Agent sont absents → déploiement depuis le terminal VPS.
+
+## Diagnostic réel (2026-11-21)
+
+| URL | Comportement |
+|---|---|
+| `http://narahservice.fr` | Page **Welcome to nginx!** (vhost `default` HTTP) |
+| `https://narahservice.fr` | Contenu **ECOM-TOUCH** (vhost SSL par défaut = ecom-touch, cert `CN=ecom-touch.tech`) |
+| `https://ecom-touch.tech` | OK — **ne pas modifier** |
+
+Cause : aucun vhost `server_name narahservice.fr` dédié. En HTTPS, Nginx tombe sur le premier/seul serveur SSL (ecom-touch).  
+Le bootstrap crée un vhost **isolé** + certificat LE pour `narahservice.fr` / `www` sans éditer la conf ecom-touch.
 
 Ne modifie **pas** ecom-touch.tech ni les autres vhosts.
 
 ---
 
-## Option A — Deux commandes (recommandée, immédiatement)
+## Option A — Deux commandes (recommandée)
 
 Connecté en **root** sur le VPS (`ssh root@147.79.118.212`) :
 
 ```bash
-git clone --depth 1 --branch cursor/vps-manual-deploy-dcdc \
-  https://github.com/warrzy/Narahservice.git /tmp/narah-src
-bash /tmp/narah-src/scripts/deploy/vps-bootstrap-as-root.sh
-```
-
-Après merge dans `main` :
-
-```bash
+rm -rf /tmp/narah-src
 git clone --depth 1 --branch main \
   https://github.com/warrzy/Narahservice.git /tmp/narah-src
 bash /tmp/narah-src/scripts/deploy/vps-bootstrap-as-root.sh

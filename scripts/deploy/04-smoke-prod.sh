@@ -29,9 +29,14 @@ check "/sitemap.xml"
 check "/images/hero/hero-camion.jpg"
 check "/images/materials/sable.jpg"
 
-# SEO basics
+# SEO / brand — ne doit PAS servir ecom-touch par erreur (SNI / default SSL)
 html=$(curl -sk "${BASE}/")
+if echo "$html" | grep -qi 'ECOM-TOUCH\|ecom-touch\.tech'; then
+  echo "FAIL site renvoie ECOM-TOUCH (vhost SSL par défaut / SNI) — vhost narahservice manquant ou cert incorrect"
+  fail=1
+fi
 echo "$html" | grep -qi 'NARAH SERVICE' && echo "OK  brand present" || { echo "FAIL brand"; fail=1; }
+echo "$html" | grep -qi 'Welcome to nginx' && { echo "FAIL welcome nginx"; fail=1; } || true
 echo "$html" | grep -qi 'application/ld+json' && echo "OK  json-ld" || { echo "FAIL json-ld"; fail=1; }
 
 # Form API without SMTP should be explicit 503 (not fake success)

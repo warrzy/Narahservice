@@ -1,34 +1,24 @@
 # Statut production — narahservice.fr
 
 **Date :** 2026-11-21  
-**Commit `main` code site :** `9812505` (+ PR bootstrap manuel en cours)
+**main :** `6919b1c` (bootstrap VPS fusionné, PR #6)
 
-## Diagnostic actuel (externe)
+## Diagnostic externe (avant déploiement manuel)
 
-| Contrôle | Résultat |
+| URL | Résultat |
 |---|---|
-| DNS A `narahservice.fr` | `147.79.118.212` |
-| HTTP `http://narahservice.fr` | **200** — page **Welcome to nginx!** (vhost `default`) |
-| HTTPS ecom-touch.tech | **200** (intact) |
-| Secrets Cloud Agent `VPS_SSH_*` | **ABSENT** (agent + sous-agent) |
+| `http://narahservice.fr` | Welcome to nginx! (default HTTP) |
+| `https://narahservice.fr` | Contenu **ECOM-TOUCH** + cert `CN=ecom-touch.tech` (default SSL) |
+| `https://ecom-touch.tech` | 200 OK — ne pas toucher |
+| Secrets Cloud `VPS_SSH_*` | ABSENT |
 
-**Cause :** aucun vhost/app NARAH déployé. Nginx répond avec le site par défaut.
-
-## Action
-
-Déploiement **manuel root** : voir [`docs/VPS-MANUAL-DEPLOY.md`](./VPS-MANUAL-DEPLOY.md)
+## Action VPS (root)
 
 ```bash
-git clone --depth 1 --branch cursor/vps-manual-deploy-dcdc \
+rm -rf /tmp/narah-src
+git clone --depth 1 --branch main \
   https://github.com/warrzy/Narahservice.git /tmp/narah-src
 bash /tmp/narah-src/scripts/deploy/vps-bootstrap-as-root.sh
 ```
 
-## Après succès attendu
-
-- `/var/www/narahservice/app` + build Next.js
-- `systemctl is-active narahservice` → active
-- `/etc/nginx/sites-enabled/narahservice`
-- LE `narahservice.fr` + `www`
-- HTML contient « NARAH SERVICE »
-- ecom-touch.tech toujours 200
+Détails : [`VPS-MANUAL-DEPLOY.md`](./VPS-MANUAL-DEPLOY.md)

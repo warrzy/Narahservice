@@ -136,6 +136,9 @@ curl -sI --max-time 10 https://ecom-touch.tech | head -5 || true
 echo "=== [8] Smoke HTTPS (si certificat prêt) ==="
 if [[ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]]; then
   bash /tmp/narah-deploy/04-smoke-prod.sh "${DOMAIN}" || true
+  echo "--- cert subject ---"
+  echo | openssl s_client -servername "${DOMAIN}" -connect 127.0.0.1:443 2>/dev/null \
+    | openssl x509 -noout -subject 2>/dev/null || true
 else
   echo "[WARN] Certificat LE absent — vérifier certbot manuellement."
 fi
@@ -147,3 +150,8 @@ echo "PORT=${APP_PORT}"
 echo "BACKUP=${BACKUP_DIR}"
 echo "Rollback vhost: bash /tmp/narah-deploy/03-rollback-remote.sh ${BACKUP_DIR}"
 echo "SHA=$(cat ${APP_ROOT}/shared/DEPLOYED_SHA 2>/dev/null || echo unknown)"
+echo
+echo "Contrôles manuels recommandés :"
+echo "  curl -sI https://${DOMAIN} | head -10"
+echo "  curl -s https://${DOMAIN} | head -c 300"
+echo "  curl -sI https://ecom-touch.tech | head -5"
