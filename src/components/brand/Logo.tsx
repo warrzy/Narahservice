@@ -12,8 +12,8 @@ type LogoProps = {
 };
 
 /**
- * Logo officiel NARAH SERVICE (camion + sable/granite, fond noir).
- * Le fond noir fait partie de l’identité — pas de pastille blanche.
+ * Logo officiel NARAH SERVICE — PNG à fond réellement transparent (canal alpha).
+ * Aucun background CSS (ni noir ni blanc) : le logo se fond dans le header.
  */
 export function Logo({
   href = "/",
@@ -22,17 +22,17 @@ export function Logo({
   full = false,
   onNavigate,
 }: LogoProps) {
+  // Noms de fichiers dédiés pour forcer le rechargement après correction transparence
   const src = full
-    ? "/images/brand/logo-full.png"
+    ? "/images/brand/logo-official.png"
     : "/images/brand/logo-header.png";
-  const width = full ? 280 : compact ? 132 : 160;
-  const height = full ? 187 : compact ? 88 : 107;
+  const width = full ? 320 : compact ? 148 : 176;
+  const height = full ? 232 : compact ? 108 : 128;
 
   const mark = (
     <span
       className={[
-        "inline-flex items-center focus-ring overflow-hidden rounded-sm bg-black shadow-sm shadow-black/30",
-        compact ? "p-0.5" : "p-0.5 sm:p-1",
+        "inline-flex items-center focus-ring bg-transparent",
         className,
       ].join(" ")}
       aria-label="NARAH SERVICE"
@@ -43,8 +43,8 @@ export function Logo({
         width={width}
         height={height}
         className={[
-          "h-auto w-auto object-contain",
-          full ? "max-h-36 sm:max-h-44" : "max-h-11 sm:max-h-14",
+          "h-auto w-auto object-contain bg-transparent",
+          full ? "max-h-40 sm:max-h-48" : compact ? "max-h-12" : "max-h-[3.25rem] sm:max-h-16",
         ].join(" ")}
         priority
       />

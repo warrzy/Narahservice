@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        // Assets brand : revalidation courte pour éviter un ancien logo en cache
+        source: "/images/brand/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, must-revalidate",
+          },
+        ],
+      },
     ];
   },
   turbopack: {
