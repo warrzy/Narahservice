@@ -1,24 +1,33 @@
 # Statut production — narahservice.fr
 
 **Date :** 2026-11-21  
-**main :** `6919b1c` (bootstrap VPS fusionné, PR #6)
+**Statut :** **EN LIGNE**
 
-## Diagnostic externe (avant déploiement manuel)
-
-| URL | Résultat |
+| Élément | Valeur |
 |---|---|
-| `http://narahservice.fr` | Welcome to nginx! (default HTTP) |
-| `https://narahservice.fr` | Contenu **ECOM-TOUCH** + cert `CN=ecom-touch.tech` (default SSL) |
-| `https://ecom-touch.tech` | 200 OK — ne pas toucher |
-| Secrets Cloud `VPS_SSH_*` | ABSENT |
+| URL | https://narahservice.fr |
+| WWW | https://www.narahservice.fr |
+| Commit déployé | `0924ebc` |
+| Port app | `3011` |
+| Service | `narahservice` (systemd) active |
+| Vhost | `/etc/nginx/sites-enabled/narahservice` |
+| Certificat | LE `CN=narahservice.fr` (+ SAN www) |
+| Backup | `/var/backups/narahservice/20261121-134631` |
 
-## Action VPS (root)
+## Vérifications externes (post-déploiement)
+
+| Contrôle | Résultat |
+|---|---|
+| HTTPS `/` | 200 — titre **NARAH SERVICE** |
+| `/a-propos` `/materiaux` `/realisations` `/contact` | 200 |
+| HTTP → HTTPS | 301 |
+| Certificat SAN | `narahservice.fr`, `www.narahservice.fr` |
+| API `/api/devis` | 503 (SMTP non configuré — attendu) |
+| WhatsApp | inactif tant que non configuré |
+| `https://ecom-touch.tech` | 200 intact |
+
+## Rollback
 
 ```bash
-rm -rf /tmp/narah-src
-git clone --depth 1 --branch main \
-  https://github.com/warrzy/Narahservice.git /tmp/narah-src
-bash /tmp/narah-src/scripts/deploy/vps-bootstrap-as-root.sh
+bash /tmp/narah-src/scripts/deploy/03-rollback-remote.sh /var/backups/narahservice/20261121-134631
 ```
-
-Détails : [`VPS-MANUAL-DEPLOY.md`](./VPS-MANUAL-DEPLOY.md)
